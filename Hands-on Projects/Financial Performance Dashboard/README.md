@@ -50,9 +50,6 @@ You’ll see interactive hover values and zoom functionality (via Plotly).
 
 ![Sales Dashboard Preview](Outputs/Sales.png)
 
-
-
-
 ## Future Enhancements
 - Add Profit Margin calculations
 - Connect to real financial data (CSV / SQL)
