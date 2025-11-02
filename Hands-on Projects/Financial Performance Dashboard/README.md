@@ -48,11 +48,10 @@ When you select R&D department:
 - **Right Plot** → Quarterly Expense Trend (line chart)
 You’ll see interactive hover values and zoom functionality (via Plotly).
 
-![Sales Dashboard](Hands-on Projects/Financial Performance Dashboard/Outputs/Sales.png)
+![Sales Dashboard Preview](Outputs/Sales.png)
 
-![R&D Dashboard](Hands-on Projects/Financial Performance Dashboard/Outputs/R&D.png)
 
-![Marketing Dashboard](Hands-on Projects/Financial Performance Dashboard/Outputs/Marketing.png)
+
 
 ## Future Enhancements
 - Add Profit Margin calculations
