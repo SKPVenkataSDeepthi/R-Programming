@@ -56,3 +56,9 @@ You’ll see interactive hover values and zoom functionality (via Plotly).
 - Include KPIs in info boxes
 - Export dashboard views as reports (PDF/PNG)
 
+
+## %>% Wrap-Up  
+
+Dashboard complete %>% insights gained %>% fun had %>%  
+connect with me on [LinkedIn](https://www.linkedin.com/in/dvskp/) %>% more ideas unleashed! 😎
+
