@@ -57,8 +57,8 @@ You’ll see interactive hover values and zoom functionality (via Plotly).
 - Export dashboard views as reports (PDF/PNG)
 
 
-## %>% Wrap-Up  
+## Shiny Cheers ✨
 
-Dashboard complete %>% insights gained %>% fun had %>%  
-connect with me on [LinkedIn](https://www.linkedin.com/in/dvskp/) %>% more ideas unleashed! 😎
+If this dashboard brightened your day like `shiny` lights up R, connect with me on [LinkedIn](https://www.linkedin.com/in/dvskp/) and let’s make more data sparkle! 💎
+
 
