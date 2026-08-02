@@ -1,0 +1,173 @@
+---
+title: "YouTube Category Insights Dashboard"
+output:
+  flexdashboard::flex_dashboard:
+    orientation: rows
+---
+
+```{r setup, include=FALSE}
+# Load required libraries
+library(flexdashboard)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(plotly)
+library(ggridges)
+library(treemapify)
+
+# Set the working directory for knitting
+knitr::opts_knit$set(
+  root.dir = "/Users/venkatasrideepthisrikotapeetamabaram/R Studio Projects"
+)
+
+# Read the dataset
+video_stats <- read.delim(
+  "videos-stats.csv",
+  sep = ",",
+  strip.white = TRUE
+)
+
+# Data Cleaning
+video_stats <- video_stats %>%
+  drop_na()
+
+# Feature Engineering
+video_stats <- video_stats %>%
+  mutate(
+    LikesPer1k = round(Likes / (Views / 1000), 2),
+    CommentsPer1k = round(Comments / (Views / 1000), 2),
+    TitleLen = nchar(Title),
+    PubYear = as.factor(substr(Published.At, 1, 4)),
+    Published.At = as.POSIXct(
+      Published.At,
+      format = "%Y-%m-%d"
+    )
+  )
+```
+Row
+-------------------------------------
+
+### Top Categories by Total Views
+
+```{r}
+video_stats %>%
+  group_by(Keyword) %>%
+  summarise(
+    TotalViews = sum(Views)/1000000,
+    .groups = "drop"
+  ) %>%
+  arrange(desc(TotalViews)) %>%
+  ggplot(
+    aes(
+      x = reorder(Keyword, TotalViews),
+      y = TotalViews,
+      fill = Keyword
+    )
+  ) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  theme_minimal() +
+  labs(
+    title = "Top Categories by Total Views",
+    x = "Category",
+    y = "Views (Millions)"
+  )
+```
+
+
+Row
+-------------------------------------
+
+### Title Length by Category
+
+```{r}
+video_stats %>%
+  ggplot(
+    aes(
+      x = Keyword,
+      y = TitleLen,
+      fill = Keyword
+    )
+  ) +
+  geom_boxplot(show.legend = FALSE) +
+  coord_flip() +
+  theme_minimal() +
+  labs(
+    title = "Distribution of Title Length by Category",
+    x = "Category",
+    y = "Title Length"
+  )
+```
+
+### Ridgeline Plot of Title Length
+
+```{r}
+ggplot(
+  video_stats,
+  aes(
+    x = TitleLen,
+    y = PubYear,
+    fill = PubYear
+  )
+) +
+  geom_density_ridges(
+    alpha = 0.7,
+    scale = 2
+  ) +
+  theme_ridges() +
+  labs(
+    title = "Title Length Distribution Across Years",
+    x = "Title Length",
+    y = "Publication Year"
+  )
+```
+Row
+-------------------------------------
+
+### Number of Videos by Category
+
+```{r}
+video_stats %>%
+  count(Keyword) %>%
+  ggplot(
+    aes(
+      x = reorder(Keyword, n),
+      y = n,
+      fill = Keyword
+    )
+  ) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  theme_minimal() +
+  labs(
+    title = "Videos Published per Category",
+    x = "Category",
+    y = "Number of Videos"
+  )
+```
+
+### Average Title Length by Category
+
+```{r}
+video_stats %>%
+  group_by(Keyword) %>%
+  summarise(
+    AvgTitle = mean(TitleLen),
+    .groups = "drop"
+  ) %>%
+  ggplot(
+    aes(
+      x = reorder(Keyword, AvgTitle),
+      y = AvgTitle,
+      fill = Keyword
+    )
+  ) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  theme_minimal() +
+  labs(
+    title = "Average Title Length by Category",
+    x = "Category",
+    y = "Average Characters"
+  )
+```

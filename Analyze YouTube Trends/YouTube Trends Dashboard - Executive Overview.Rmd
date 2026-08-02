@@ -1,0 +1,81 @@
+---
+title: "YouTube Trends Dashboard - Executive Overview"
+output:
+  flexdashboard::flex_dashboard:
+    orientation: columns
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(dplyr)
+library(plotly)
+library(tidyr)
+library(ggplot2)
+
+video_stats <- read.delim("videos-stats.csv", sep=",", strip.white=TRUE)
+
+video_stats <- video_stats %>%
+  drop_na() %>%
+  mutate(
+    LikesPer1k = round(Likes/(Views/1000),2),
+    CommentsPer1k = round(Comments/(Views/1000),2),
+    TitleLen = nchar(Title),
+    PubYear = as.factor(substr(Published.At,1,4)),
+    Published.At = as.POSIXct(Published.At,"%Y-%m-%d")
+  )
+```
+
+Column {data-width=550}
+-----------------------------------------------------------------------
+
+### Videos Published by Year
+
+```{r}
+video_stats %>%
+ggplot(aes(PubYear))+
+geom_bar(fill="#765add")+
+theme_minimal()
+```
+
+### Likes vs Comments
+
+```{r}
+video_stats %>%
+plot_ly(
+x=~LikesPer1k,
+y=~CommentsPer1k,
+color=~Keyword,
+size=~Views,
+type="scatter",
+mode="markers")
+```
+
+Column {data-width=450}
+-----------------------------------------------------------------------
+
+### Title Length Distribution
+
+```{r}
+video_stats %>%
+ggplot(aes(TitleLen))+
+geom_histogram(
+binwidth=5,
+fill="#765add",
+color="white")+
+theme_minimal()
+```
+
+### Average Title Length by Year
+
+```{r}
+plot2 <- video_stats %>%
+group_by(PubYear) %>%
+summarise(avg=mean(TitleLen))
+
+ggplotly(
+ggplot(plot2,
+aes(PubYear,avg,group=1))+
+geom_line(color="#765add")+
+geom_point()
+)
+```

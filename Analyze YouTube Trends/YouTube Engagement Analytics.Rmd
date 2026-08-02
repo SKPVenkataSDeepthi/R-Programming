@@ -1,0 +1,159 @@
+---
+title: "YouTube Engagement Analytics Dashboard"
+output:
+  flexdashboard::flex_dashboard:
+    orientation: column
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(plotly)
+library(corrplot)
+
+video_stats <- read.delim(
+  "videos-stats.csv",
+  sep = ",",
+  strip.white = TRUE
+)
+
+video_stats <- video_stats %>%
+  drop_na() %>%
+  mutate(
+    LikesPer1k = round(Likes/(Views/1000),2),
+    CommentsPer1k = round(Comments/(Views/1000),2),
+    TitleLen = nchar(Title),
+    PubYear = as.factor(substr(Published.At,1,4)),
+    Published.At = as.POSIXct(
+      Published.At,
+      format="%Y-%m-%d"
+    )
+  )
+```
+
+Row
+-------------------------------------
+
+### Likes vs Comments per 1k Views
+
+```{r}
+video_stats %>%
+  plot_ly(
+    x = ~LikesPer1k,
+    y = ~CommentsPer1k,
+    color = ~Keyword,
+    size = ~Views,
+    sizes = c(5,70),
+    type = "scatter",
+    mode = "markers",
+    marker = list(
+      opacity = 0.6,
+      sizemode = "diameter"
+    ),
+    hoverinfo = "text",
+    text = ~paste(
+      paste0("<b>", Title, "</b>"),
+      paste0("<br>Category: ", Keyword),
+      paste0("<br>Views: ", format(Views,big.mark=",")),
+      paste0("<br>Likes / 1k: ", LikesPer1k),
+      paste0("<br>Comments / 1k: ", CommentsPer1k)
+    )
+  ) %>%
+  layout(
+    title = "Likes vs Comments per 1k Views",
+    xaxis = list(title="Likes per 1k Views"),
+    yaxis = list(title="Comments per 1k Views")
+  )
+```
+
+### Correlation Matrix
+
+```{r}
+corr_matrix <- cor(
+  video_stats[,c(
+    "Views",
+    "Likes",
+    "Comments",
+    "LikesPer1k",
+    "CommentsPer1k",
+    "TitleLen"
+  )]
+)
+
+corrplot(
+  corr_matrix,
+  method="color",
+  type="upper",
+  addCoef.col="black",
+  number.cex=0.7,
+  tl.cex=0.8
+)
+```
+Row
+-------------------------------------
+
+### Total Comments by Category Over Time
+
+```{r}
+comments_trend <- video_stats %>%
+  group_by(PubYear, Keyword) %>%
+  summarise(
+    TotalComments = sum(Comments)/1000,
+    .groups = "drop"
+  )
+
+ggplotly(
+  ggplot(
+    comments_trend,
+    aes(
+      x = PubYear,
+      y = TotalComments,
+      color = Keyword,
+      group = Keyword
+    )
+  ) +
+    geom_line(linewidth = 1) +
+    geom_point(size = 2) +
+    theme_minimal() +
+    labs(
+      title = "Total Comments by Category Over Time",
+      x = "Publication Year",
+      y = "Comments (Thousands)"
+    )
+)
+```
+
+---
+
+Row
+-------------------------------------
+
+### Average Likes per 1k Views by Category
+
+```{r}
+video_stats %>%
+  group_by(Keyword) %>%
+  summarise(
+    AvgLikes = mean(LikesPer1k),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(AvgLikes)) %>%
+  ggplot(
+    aes(
+      x = reorder(Keyword, AvgLikes),
+      y = AvgLikes,
+      fill = Keyword
+    )
+  ) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  theme_minimal() +
+  labs(
+    title = "Average Likes per 1k Views",
+    x = "Category",
+    y = "Likes per 1k Views"
+  )
+```
+
